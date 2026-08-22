@@ -1,6 +1,6 @@
 # Jarvis-RAG
-trinaini vijaya lella (lead)
-lakshman kumar
-thanvi
-bindhu
+trinaini vijaya lella (lead),
+lakshman kumar,
+thanvi,
+bindhu,
 ajitha
