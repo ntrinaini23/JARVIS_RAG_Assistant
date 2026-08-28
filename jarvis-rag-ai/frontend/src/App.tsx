@@ -19,6 +19,7 @@ export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [enable3D, setEnable3D] = useState<boolean>(true);
   const [globalChatState, setGlobalChatState] = useState<'idle' | 'searching' | 'thinking' | 'responding' | 'error'>('idle');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   // Apply dark mode class to html element on theme changes
   useEffect(() => {
@@ -52,18 +53,11 @@ export default function App() {
     localStorage.setItem('jarvis_enable_3d', val.toString());
   };
 
-  // Page Routing switcher
+  // Page Routing switcher (Chat is now handled separately to keep state mounted)
   const renderActivePage = () => {
     switch (activePage) {
       case 'dashboard':
         return <Dashboard />;
-      case 'chat':
-        return (
-          <Chat 
-            chatState={globalChatState} 
-            setChatState={setGlobalChatState} 
-          />
-        );
       case 'documents':
         return <Documents />;
       case 'knowledge':
@@ -79,8 +73,9 @@ export default function App() {
             setTheme={handleSetTheme} 
           />
         );
+      case 'chat':
       default:
-        return <Dashboard />;
+        return null;
     }
   };
 
@@ -90,7 +85,7 @@ export default function App() {
       {/* Full-screen 3D Jarvis Neural Interface Background */}
       {enable3D && (
         <div className="absolute inset-0 z-0 pointer-events-none opacity-25 dark:opacity-15 flex items-center justify-center overflow-hidden">
-          <Canvas camera={{ position: [0, 0, 3.8], fov: 60 }} style={{ pointerEvents: 'auto', width: '100vw', height: '100vh' }}>
+          <Canvas camera={{ position: [0, 0, 15], fov: 60 }} style={{ pointerEvents: 'auto', width: '100vw', height: '100vh' }}>
             <ambientLight intensity={0.7} />
             <directionalLight position={[2, 2, 2]} intensity={1.5} />
             <JarvisOrb state={globalChatState} theme={theme} />
@@ -99,26 +94,62 @@ export default function App() {
         </div>
       )}
 
-      {/* Sidebar Navigation */}
-      <Sidebar 
-        activePage={activePage} 
-        setActivePage={setActivePage} 
-        collapsed={sidebarCollapsed} 
-        setCollapsed={setSidebarCollapsed} 
-      />
+      {/* Desktop Sidebar Navigation */}
+      <div className="hidden md:flex h-full flex-shrink-0">
+        <Sidebar 
+          activePage={activePage} 
+          setActivePage={setActivePage} 
+          collapsed={sidebarCollapsed} 
+          setCollapsed={setSidebarCollapsed} 
+        />
+      </div>
+
+      {/* Mobile Sidebar Backdrop */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Mobile Sidebar Drawer */}
+      <div 
+        className={`fixed inset-y-0 left-0 z-50 transform ${
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        } transition-transform duration-300 ease-in-out md:hidden flex h-full flex-shrink-0`}
+      >
+        <Sidebar 
+          activePage={activePage} 
+          setActivePage={(page) => {
+            setActivePage(page);
+            setMobileMenuOpen(false);
+          }} 
+          collapsed={false} 
+          setCollapsed={() => {}} 
+        />
+      </div>
 
       {/* Main Workspace Column */}
-      <div className="flex flex-col flex-grow h-screen overflow-hidden relative z-10">
+      <div className="flex flex-col flex-grow h-screen overflow-hidden relative z-10 w-full">
         
         {/* Top Header systems check */}
         <TopHeader 
           activePage={activePage} 
           theme={theme} 
           setTheme={handleSetTheme} 
+          onMenuClick={() => setMobileMenuOpen(true)}
         />
 
         {/* Scrollable Page Space */}
-        <main className="flex-grow overflow-y-auto p-8 relative">
+        <main className="flex-grow overflow-y-auto p-4 md:p-8 relative">
+          {/* Keep Chat mounted to preserve active SSE streaming and state */}
+          <div className={activePage === 'chat' ? 'block' : 'hidden'}>
+            <Chat 
+              chatState={globalChatState} 
+              setChatState={setGlobalChatState} 
+              isActive={activePage === 'chat'}
+            />
+          </div>
           {renderActivePage()}
         </main>
       </div>

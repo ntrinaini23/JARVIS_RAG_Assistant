@@ -1,10 +1,11 @@
-import { Sun, Moon, Database, Cpu } from 'lucide-react';
+import { Sun, Moon, Database, Cpu, Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface TopHeaderProps {
   activePage: string;
   theme: 'light' | 'dark';
   setTheme: (theme: 'light' | 'dark') => void;
+  onMenuClick?: () => void;
 }
 
 interface HealthStatus {
@@ -16,7 +17,7 @@ interface HealthStatus {
   };
 }
 
-export default function TopHeader({ activePage, theme, setTheme }: TopHeaderProps) {
+export default function TopHeader({ activePage, theme, setTheme, onMenuClick }: TopHeaderProps) {
   const [health, setHealth] = useState<HealthStatus | null>(null);
 
   // Poll API health endpoint every 10 seconds
@@ -52,15 +53,26 @@ export default function TopHeader({ activePage, theme, setTheme }: TopHeaderProp
   };
 
   return (
-    <header className="h-20 border-b border-slate-200/20 dark:border-slate-800/20 glass-panel flex items-center justify-between px-8 relative z-20">
+    <header className="h-20 border-b border-slate-200/20 dark:border-slate-800/20 glass-panel flex items-center justify-between px-4 md:px-8 relative z-20">
       {/* Title */}
-      <div>
-        <h1 className="text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
-          {pageTitles[activePage] || 'JARVIS'}
-        </h1>
-        <p className="text-xs text-slate-400 dark:text-slate-500">
-          Your Documents. Your Knowledge. Your AI.
-        </p>
+      <div className="flex items-center gap-3">
+        {onMenuClick && (
+          <button
+            onClick={onMenuClick}
+            className="md:hidden w-10 h-10 rounded-xl glass-panel border border-slate-200/30 hover:border-cyan-400 flex items-center justify-center text-slate-500 hover:text-cyan-400 dark:text-slate-400 dark:hover:text-cyan-400 transition-colors"
+            aria-label="Open menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
+        <div>
+          <h1 className="text-base md:text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
+            {pageTitles[activePage] || 'JARVIS'}
+          </h1>
+          <p className="text-[10px] md:text-xs text-slate-400 dark:text-slate-500">
+            Your Documents. Your Knowledge. Your AI.
+          </p>
+        </div>
       </div>
 
       {/* Systems Status Bar and Theme Switcher */}
@@ -101,16 +113,6 @@ export default function TopHeader({ activePage, theme, setTheme }: TopHeaderProp
           {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </button>
 
-        {/* Profile Circle */}
-        <div className="flex items-center gap-3 border-l border-slate-200/20 dark:border-slate-800/20 pl-6">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-violet-500 flex items-center justify-center font-bold text-white text-sm shadow-glass">
-            JD
-          </div>
-          <div className="hidden xl:block text-left">
-            <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">John Doe</p>
-            <p className="text-[10px] text-slate-400">RAG Administrator</p>
-          </div>
-        </div>
       </div>
     </header>
   );

@@ -27,9 +27,10 @@ interface Message {
 interface ChatProps {
   chatState: 'idle' | 'searching' | 'thinking' | 'responding' | 'error';
   setChatState: (state: 'idle' | 'searching' | 'thinking' | 'responding' | 'error') => void;
+  isActive?: boolean;
 }
 
-export default function Chat({ chatState, setChatState }: ChatProps) {
+export default function Chat({ chatState, setChatState, isActive }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -51,6 +52,16 @@ export default function Chat({ chatState, setChatState }: ChatProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, searchingLog]);
 
+  // Scroll to bottom when the page becomes active
+  useEffect(() => {
+    if (isActive) {
+      const timer = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isActive]);
+
   const [activeModel, setActiveModel] = useState('qwen2.5:0.5b');
   const [activeProvider, setActiveProvider] = useState('ollama');
 
@@ -71,7 +82,7 @@ export default function Chat({ chatState, setChatState }: ChatProps) {
 
     const fetchConfigs = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/settings');
+        const res = await fetch('http://127.0.0.1:8000/api/settings');
         if (res.ok) {
           const data = await res.json();
           const s = data.settings;
@@ -131,7 +142,7 @@ export default function Chat({ chatState, setChatState }: ChatProps) {
 
     try {
       // Connect to SSE stream endpoint
-      const response = await fetch('http://localhost:8000/api/chat', {
+      const response = await fetch('http://127.0.0.1:8000/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: textToSend })

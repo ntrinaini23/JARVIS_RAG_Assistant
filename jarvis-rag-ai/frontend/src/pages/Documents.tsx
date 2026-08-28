@@ -64,7 +64,7 @@ export default function Documents() {
 
   const fetchDocuments = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/documents');
+      const res = await fetch('http://127.0.0.1:8000/api/documents');
       if (res.ok) {
         const data = await res.json();
         setDocuments(data);
@@ -125,7 +125,7 @@ export default function Documents() {
         });
       }, 200);
 
-      const res = await fetch('http://localhost:8000/api/documents/upload', {
+      const res = await fetch('http://127.0.0.1:8000/api/documents/upload', {
         method: 'POST',
         body: formData
       });
@@ -194,7 +194,7 @@ export default function Documents() {
     setErrorMsg(null);
     setWebIngesting(true);
     try {
-      const res = await fetch('http://localhost:8000/api/documents/url', {
+      const res = await fetch('http://127.0.0.1:8000/api/documents/url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: websiteUrl })
@@ -225,7 +225,7 @@ export default function Documents() {
     setErrorMsg(null);
     setDbIngesting(true);
     try {
-      const res = await fetch('http://localhost:8000/api/documents/database', {
+      const res = await fetch('http://127.0.0.1:8000/api/documents/database', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -255,7 +255,7 @@ export default function Documents() {
 
   const confirmDelete = async (id: number) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/documents/${id}`, {
+      const res = await fetch(`http://127.0.0.1:8000/api/documents/${id}`, {
         method: 'DELETE'
       });
       if (res.ok) {

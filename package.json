@@ -1,0 +1,14 @@
+{
+  "name": "jarvis-rag-ai-workspace",
+  "version": "1.0.0",
+  "description": "Orchestration workspace for JARVIS RAG AI application",
+  "main": "start-project.js",
+  "scripts": {
+    "dev": "node start-project.js",
+    "start": "node start-project.js",
+    "test": "node -e \"const cp = require('child_process'); const py = process.platform === 'win32' ? 'jarvis-rag-ai/backend/.venv/Scripts/python.exe' : 'jarvis-rag-ai/backend/.venv/bin/python'; cp.spawnSync(py, ['test_rag.py'], { cwd: 'jarvis-rag-ai/backend', stdio: 'inherit' });\""
+  },
+  "private": true,
+  "author": "Antigravity AI",
+  "license": "ISC"
+}

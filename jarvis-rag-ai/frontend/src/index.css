@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --bg-primary: #ffffff;
+    --bg-primary: radial-gradient(circle at center, #f0f9ff 0%, #e0f2fe 55%, #f8fafc 100%);
     --bg-card: rgba(255, 255, 255, 0.8);
     --border-color: rgba(0, 0, 0, 0.1);
     --text-primary: #000000;
@@ -14,7 +14,7 @@
   }
 
   .dark {
-    --bg-primary: #030712;
+    --bg-primary: radial-gradient(circle at center, #082f49 0%, #020617 55%, #000000 100%);
     --bg-card: rgba(15, 23, 42, 0.6);
     --border-color: rgba(30, 41, 59, 0.8);
     --text-primary: #f8fafc;
@@ -24,11 +24,11 @@
   }
 
   body {
-    background-color: var(--bg-primary);
+    background: var(--bg-primary);
     color: var(--text-primary);
     font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
     overflow-x: hidden;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background 0.3s ease, color 0.3s ease;
   }
 }
 

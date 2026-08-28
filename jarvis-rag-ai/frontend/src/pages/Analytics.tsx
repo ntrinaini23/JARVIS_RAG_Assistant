@@ -29,9 +29,9 @@ export default function Analytics() {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        await fetch('http://localhost:8000/api/activity');
+        await fetch('http://127.0.0.1:8000/api/activity');
         // Let's also retrieve recent queries
-        const statsRes = await fetch('http://localhost:8000/api/stats');
+        const statsRes = await fetch('http://127.0.0.1:8000/api/stats');
         const stats = await statsRes.json();
         setTotalQuestions(stats.total_questions || 0);
         

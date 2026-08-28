@@ -1,6 +1,5 @@
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { MeshDistortMaterial, Sphere } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface JarvisOrbProps {
@@ -9,135 +8,159 @@ interface JarvisOrbProps {
 }
 
 export default function JarvisOrb({ state, theme = 'dark' }: JarvisOrbProps) {
-  const orbRef = useRef<THREE.Mesh>(null);
+  const coreRef = useRef<THREE.Mesh>(null);
+  const webGroupRef = useRef<THREE.LineSegments>(null);
   const particlesRef = useRef<THREE.Points>(null);
+
   const isDark = theme !== 'light';
 
-  // Define state behaviors
+  // Dynamic colors and speed parameters mapping state to the web background
   const config = {
     idle: {
-      color: '#06b6d4',       // Neon Cyan
-      distort: 0.3,
-      speed: 1.5,
-      roughness: 0.2,
-      metalness: 0.8,
-      rotationSpeed: 0.3,
+      coreColor: isDark ? '#00ffff' : '#0284c7',       // Cyan vs Sky Blue
+      webColor: isDark ? '#0088ff' : '#1d4ed8',        // Blue vs Deep Blue
+      particleColor: isDark ? '#00ffff' : '#2563eb',   // Cyan vs Royal Blue
+      speedMultiplier: 1.0,
     },
     searching: {
-      color: '#3b82f6',       // Electric Blue
-      distort: 0.6,
-      speed: 4.0,
-      roughness: 0.4,
-      metalness: 0.9,
-      rotationSpeed: 1.5,
+      coreColor: isDark ? '#0088ff' : '#1d4ed8',       // Blue vs Deep Blue
+      webColor: isDark ? '#1d4ed8' : '#1e3a8a',        // Deep Blue vs Navy
+      particleColor: isDark ? '#60a5fa' : '#3b82f6',   // Sky Blue vs Royal Blue
+      speedMultiplier: 2.2,
     },
     thinking: {
-      color: '#8b5cf6',       // Purple Violet
-      distort: 0.4,
-      speed: 3.0,
-      roughness: 0.1,
-      metalness: 0.7,
-      rotationSpeed: 0.8,
+      coreColor: isDark ? '#a78bfa' : '#6366f1',       // Violet vs Indigo
+      webColor: isDark ? '#6d28d9' : '#4f46e5',        // Deep Purple vs Indigo
+      particleColor: isDark ? '#c084fc' : '#818cf8',   // Purple vs Light Indigo
+      speedMultiplier: 1.6,
     },
     responding: {
-      color: '#10b981',      // Emerald Green
-      distort: 0.25,
-      speed: 2.0,
-      roughness: 0.3,
-      metalness: 0.8,
-      rotationSpeed: 0.5,
+      coreColor: isDark ? '#34d399' : '#0ea5e9',       // Emerald vs Cyan
+      webColor: isDark ? '#0d9488' : '#0284c7',        // Teal vs Sky Blue
+      particleColor: isDark ? '#6ee7b7' : '#38bdf8',   // Mint vs Blue-Cyan
+      speedMultiplier: 1.2,
+    },
+    error: {
+      coreColor: '#ef4444',                            // Red
+      webColor: '#b91c1c',                             // Crimson
+      particleColor: '#fca5a5',                        // Light Red
+      speedMultiplier: 3.0,
     },
   }[state];
 
-  // If in light mode, change the animation colors to shades of blue (except error)
-  const orbColor = isDark 
-    ? config.color 
-    : {
-        idle: '#2563eb',       // Royal Blue
-        searching: '#1d4ed8',  // Deep Blue
-        thinking: '#4f46e5',   // Indigo Blue
-        responding: '#0284c7', // Sky Blue
-        error: '#ef4444',      // Red
-      }[state];
+  // =============================
+  // PARTICLES
+  // =============================
+  const particleCount = 1200;
+  const particlePositions = useMemo(() => {
+    const pos = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount * 3; i++) {
+      pos[i] = (Math.random() - 0.5) * 40;
+    }
+    return pos;
+  }, []);
 
-  // Adjust material properties and blending based on theme
-  const currentMetalness = isDark ? config.metalness : 0.05;
-  const currentRoughness = isDark ? config.roughness : 0.5;
-  const currentBlending = isDark ? THREE.AdditiveBlending : THREE.NormalBlending;
-
-  // Particle positions
-  const particleCount = 120;
-  const positions = new Float32Array(particleCount * 3);
-  for (let i = 0; i < particleCount; i++) {
-    const angle = (i / particleCount) * Math.PI * 2;
-    const radius = 2.0 + Math.random() * 0.8;
-    positions[i * 3] = Math.cos(angle) * radius;
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 0.6;
-    positions[i * 3 + 2] = Math.sin(angle) * radius;
-  }
-
-  useFrame((stateFrame) => {
-    const time = stateFrame.clock.getElapsedTime();
-    
-    // Rotate orb
-    if (orbRef.current) {
-      orbRef.current.rotation.y += 0.005 * config.rotationSpeed;
-      orbRef.current.rotation.x = Math.sin(time * 0.5) * 0.15;
-      
-      // Floating effect
-      orbRef.current.position.y = Math.sin(time * 1.2) * 0.12;
+  // =============================
+  // WEB STRUCTURE
+  // =============================
+  const pointCount = 100;
+  const linePositions = useMemo(() => {
+    // 1. Generate random points
+    const points: THREE.Vector3[] = [];
+    for (let i = 0; i < pointCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * 8 + 1;
+      points.push(
+        new THREE.Vector3(
+          Math.cos(angle) * radius,
+          Math.sin(angle) * radius,
+          (Math.random() - 0.5) * 4
+        )
+      );
     }
 
-    // Rotate and animate surrounding particles
+    // 2. Identify connections with distance < 2.5
+    const vertices: number[] = [];
+    for (let i = 0; i < points.length; i++) {
+      for (let j = i + 1; j < points.length; j++) {
+        const distance = points[i].distanceTo(points[j]);
+        if (distance < 2.5) {
+          vertices.push(points[i].x, points[i].y, points[i].z);
+          vertices.push(points[j].x, points[j].y, points[j].z);
+        }
+      }
+    }
+    return new Float32Array(vertices);
+  }, []);
+
+  useFrame((stateFrame) => {
+    const elapsedTime = stateFrame.clock.getElapsedTime();
+    const pointerX = stateFrame.pointer.x; // Range [-1, 1]
+    const pointerY = stateFrame.pointer.y; // Range [-1, 1]
+    const speed = config.speedMultiplier;
+
+    // Rotate particles
     if (particlesRef.current) {
-      particlesRef.current.rotation.y -= 0.008 * config.rotationSpeed;
-      // Pulse particles
-      const scale = 1.0 + Math.sin(time * 2.0) * 0.05 * (state === 'thinking' ? 1.8 : 0.8);
-      particlesRef.current.scale.set(scale, scale, scale);
+      particlesRef.current.rotation.y = elapsedTime * 0.02 * speed;
+    }
+
+    // Rotate and interactive sway webGroup
+    if (webGroupRef.current) {
+      webGroupRef.current.rotation.z = elapsedTime * 0.04 * speed;
+      webGroupRef.current.rotation.y += (pointerX * 0.15 - webGroupRef.current.rotation.y) * 0.02 * speed;
+      webGroupRef.current.rotation.x += (pointerY * 0.1 - webGroupRef.current.rotation.x) * 0.02 * speed;
+    }
+
+    // Rotate core & float levitation
+    if (coreRef.current) {
+      coreRef.current.rotation.x = elapsedTime * 0.4 * speed;
+      coreRef.current.rotation.y = elapsedTime * 0.6 * speed;
+      coreRef.current.position.y = Math.sin(elapsedTime * 1.5 * speed) * 0.5;
     }
   });
 
   return (
     <group>
-      {/* Central JARVIS Orb */}
-      <Sphere ref={orbRef} args={[1.3, 64, 64]}>
-        <MeshDistortMaterial
-          color={orbColor}
-          distort={config.distort}
-          speed={config.speed}
-          roughness={currentRoughness}
-          metalness={currentMetalness}
-          clearcoat={1.0}
-          clearcoatRoughness={0.1}
-        />
-      </Sphere>
-
-      {/* Glow Center Sphere */}
-      <mesh>
-        <sphereGeometry args={[1.0, 32, 32]} />
+      {/* Central 3D Core */}
+      <mesh ref={coreRef}>
+        <icosahedronGeometry args={[2.2, 2]} />
         <meshBasicMaterial
-          color={orbColor}
+          color={config.coreColor}
+          wireframe
           transparent
-          opacity={isDark ? 0.15 : 0.3}
-          blending={currentBlending}
+          opacity={isDark ? 0.65 : 0.4}
         />
       </mesh>
 
-      {/* Floating Knowledge Dust particles around the Orb */}
+      {/* Web Connections */}
+      <lineSegments ref={webGroupRef}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[linePositions, 3]}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial
+          color={config.webColor}
+          transparent
+          opacity={isDark ? 0.35 : 0.25}
+        />
+      </lineSegments>
+
+      {/* Starfield Particles */}
       <points ref={particlesRef}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            args={[positions, 3]}
+            args={[particlePositions, 3]}
           />
         </bufferGeometry>
         <pointsMaterial
-          size={0.05}
-          color={orbColor}
+          color={config.particleColor}
+          size={0.035}
           transparent
-          opacity={isDark ? 0.8 : 0.9}
+          opacity={isDark ? 0.65 : 0.45}
           sizeAttenuation
-          blending={currentBlending}
         />
       </points>
     </group>

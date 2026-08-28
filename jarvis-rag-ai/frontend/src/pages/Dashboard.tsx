@@ -30,12 +30,12 @@ export default function Dashboard() {
   const fetchDashboardData = async () => {
     try {
       // Fetch stats
-      const statsRes = await fetch('http://localhost:8000/api/stats');
+      const statsRes = await fetch('http://127.0.0.1:8000/api/stats');
       const statsData = await statsRes.json();
       setStats(statsData);
 
       // Fetch activity logs
-      const actRes = await fetch('http://localhost:8000/api/activity?limit=5');
+      const actRes = await fetch('http://127.0.0.1:8000/api/activity?limit=5');
       const actData = await actRes.json();
       setActivities(actData);
     } catch (err) {

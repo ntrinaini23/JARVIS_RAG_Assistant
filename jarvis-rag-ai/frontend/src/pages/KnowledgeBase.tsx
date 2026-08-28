@@ -34,7 +34,7 @@ export default function KnowledgeBase({ enable3D, setEnable3D }: KnowledgeBasePr
 
   const fetchGraphData = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/knowledge-graph');
+      const res = await fetch('http://127.0.0.1:8000/api/knowledge-graph');
       if (res.ok) {
         const data = await res.json();
         setNodes(data.nodes);

@@ -41,7 +41,7 @@ export default function Settings({ enable3D, setEnable3D, theme, setTheme }: Set
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/settings');
+        const res = await fetch('http://127.0.0.1:8000/api/settings');
         if (res.ok) {
           const data = await res.json();
           const s = data.settings;
@@ -88,7 +88,7 @@ export default function Settings({ enable3D, setEnable3D, theme, setTheme }: Set
         gemini_model: geminiModel
       };
 
-      const res = await fetch('http://localhost:8000/api/settings', {
+      const res = await fetch('http://127.0.0.1:8000/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
