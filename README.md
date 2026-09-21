@@ -1,7 +1,7 @@
 # Jarvis-RAG
 Team Members :
-Trinaini Vijaya Leela (lead),
-Lakshman Kumar,
+Nalle Trinaini Vijaya Leela (lead),
+Pechetti Lakshman Kumar,
 Thanvi,
-Bindhu,
-Ajitha
+Talakonda Bindusri,
+Komatla Ajitha Reddy
