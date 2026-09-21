@@ -2,6 +2,6 @@
 Team Members :
 Nalle Trinaini Vijaya Leela (lead),
 Pechetti Lakshman Kumar,
-Thanvi,
+Gutta Thanvi,
 Talakonda Bindusri,
 Komatla Ajitha Reddy
