@@ -253,39 +253,61 @@ class QueryEngine:
                 }
 
         else:
-            url = f"{settings.OLLAMA_HOST}/api/generate"
-            payload = {
-                "model": model_name,
-                "prompt": prompt,
-                "options": {
-                    "temperature": temperature,
-                    "num_predict": max_tokens
-                },
-                "stream": True
-            }
+            # Primary path: use the LlamaIndex Ollama integration, as documented
+            # in the architecture (Inference Orchestration: LlamaIndex + Ollama).
+            # This mirrors the non-streaming query() method instead of bypassing
+            # LlamaIndex with a hand-rolled httpx call.
             try:
-                with httpx.stream("POST", url, json=payload, timeout=60.0) as response:
-                    if response.status_code != 200:
+                llm = Ollama(
+                    model=model_name,
+                    base_url=settings.OLLAMA_HOST,
+                    temperature=temperature,
+                    additional_kwargs={"num_predict": max_tokens},
+                    request_timeout=60.0,
+                )
+                for chunk_response in llm.stream_complete(prompt):
+                    if chunk_response.delta:
                         yield {
                             "type": "content",
-                            "delta": f"Error: Ollama returned status {response.status_code}."
+                            "delta": chunk_response.delta
                         }
-                        return
-                        
-                    for line in response.iter_lines():
-                        if line:
-                            chunk_data = json.loads(line)
-                            delta = chunk_data.get("response", "")
-                            if delta:
-                                yield {
-                                    "type": "content",
-                                    "delta": delta
-                                }
             except Exception as e:
-                yield {
-                    "type": "content",
-                    "delta": f"\n[Backend Error connecting to Ollama: {str(e)}]"
+                # Fallback to a direct REST call if the LlamaIndex client
+                # encounters issues (e.g. version mismatch, unexpected payload).
+                print(f"LlamaIndex Ollama streaming error: {e}. Falling back to direct REST request.")
+                url = f"{settings.OLLAMA_HOST}/api/generate"
+                payload = {
+                    "model": model_name,
+                    "prompt": prompt,
+                    "options": {
+                        "temperature": temperature,
+                        "num_predict": max_tokens
+                    },
+                    "stream": True
                 }
+                try:
+                    with httpx.stream("POST", url, json=payload, timeout=60.0) as response:
+                        if response.status_code != 200:
+                            yield {
+                                "type": "content",
+                                "delta": f"Error: Ollama returned status {response.status_code}."
+                            }
+                            return
+
+                        for line in response.iter_lines():
+                            if line:
+                                chunk_data = json.loads(line)
+                                delta = chunk_data.get("response", "")
+                                if delta:
+                                    yield {
+                                        "type": "content",
+                                        "delta": delta
+                                    }
+                except Exception as inner_e:
+                    yield {
+                        "type": "content",
+                        "delta": f"\n[Backend Error connecting to Ollama: {str(inner_e)}]"
+                    }
 
     def _query_gemini_direct(self, prompt: str, model_name: str, temperature: float, max_tokens: int, api_key: str) -> str:
         """Direct HTTP request to Gemini API."""
