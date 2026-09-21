@@ -1,9 +1,16 @@
-<<<<<<< HEAD
+**J.A.R.V.I.S**
+Team Members :
+Nalle Trinaini Vijaya Leela (lead),
+Pechetti Lakshman Kumar,
+Gutta Thanvi,
+Talakonda Bindusri,
+Komatla Ajitha Reddy
+
 # JARVIS — Intelligent Knowledge Assistant
 
 > **Tagline:** *Your Documents. Your Knowledge. Your AI.*
 
-JARVIS is a production-quality, full-stack **Retrieval-Augmented Generation (RAG)** application. It ingests knowledge from documents, websites, or raw database records, processes it into a persistent vector space, and lets you chat with a local AI assistant that answers questions **strictly** using facts extracted from that knowledge base.
+JARVIS is a production-quality, full-stack **Retrieval-Augmented Generation (RAG)** application. It ingests knowledge from documents, websites, or raw database records, and stores it in a persistent vector space. It lets you chat with a local AI assistant that answers questions **strictly** from that knowledge base.
 
 ---
 
@@ -12,7 +19,7 @@ JARVIS is a production-quality, full-stack **Retrieval-Augmented Generation (RAG
 - **Multi-source ingestion** — build your knowledge base from:
   - **File upload:** PDF, TXT, and DOCX documents
   - **Website crawler:** paste a URL and JARVIS fetches, strips HTML, and indexes the page text
-  - **Database / table records:** paste raw exported text (e.g. a CSV/SQL dump) and give it a database + table name to ingest as a document
+  - **Database/table records:** paste raw exported text (e.g. a CSV/SQL dump) and give it a database + table name to ingest as a document
 - **Background indexing pipeline** with live per-document status (`Uploaded → Processing → Indexed / Failed`), plus a one-click **reprocess** action for anything that failed or is stuck as "Uploaded"
 - **Grounded chat** — every answer is generated only from retrieved context; if nothing meets the similarity bar, JARVIS says so instead of guessing
 - **Streamed responses** over Server-Sent Events (SSE) for a real-time typing effect, with source citations returned alongside the answer
@@ -32,7 +39,7 @@ JARVIS is a production-quality, full-stack **Retrieval-Augmented Generation (RAG
                      [Document Loading & Text Extraction]
                                   │
                                   ▼
-                 [Smart Sentence-Aware Chunking (512 char, 64-char overlap)]
+                 [Smart Sentence-Aware Chunking (512 chars, 64-char overlap)]
                                   │
                                   ▼
        [Generate Embeddings via sentence-transformers/all-MiniLM-L6-v2]
@@ -201,11 +208,5 @@ export OPENAI_API_KEY="your-key-here"
 - **Website ingestion returns no text:**
   Some sites render content client-side via JavaScript; the crawler only reads server-rendered HTML, so heavily JS-driven pages may yield little or no extractable text.
 =======
-# Jarvis-RAG
-Team Members :
-Nalle Trinaini Vijaya Leela (lead),
-Pechetti Lakshman Kumar,
-Gutta Thanvi,
-Talakonda Bindusri,
-Komatla Ajitha Reddy
+
 >>>>>>> fda71457946ebbc06172c67267f0d5c86c1cf057
