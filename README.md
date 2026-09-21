@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # JARVIS — Intelligent Knowledge Assistant
 
 > **Tagline:** *Your Documents. Your Knowledge. Your AI.*
@@ -199,3 +200,12 @@ export OPENAI_API_KEY="your-key-here"
   Verify the file is not corrupted, scanned (scanned image PDFs require OCR which is outside the current scope), or password-protected.
 - **Website ingestion returns no text:**
   Some sites render content client-side via JavaScript; the crawler only reads server-rendered HTML, so heavily JS-driven pages may yield little or no extractable text.
+=======
+# Jarvis-RAG
+Team Members :
+Nalle Trinaini Vijaya Leela (lead),
+Pechetti Lakshman Kumar,
+Gutta Thanvi,
+Talakonda Bindusri,
+Komatla Ajitha Reddy
+>>>>>>> fda71457946ebbc06172c67267f0d5c86c1cf057
